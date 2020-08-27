@@ -66,6 +66,7 @@
 			this.rtTextArea.Size = new System.Drawing.Size(1189, 668);
 			this.rtTextArea.TabIndex = 0;
 			this.rtTextArea.Text = "";
+			this.rtTextArea.SelectionChanged += new System.EventHandler(this.rtTextArea_SelectionChanged);
 			this.rtTextArea.TextChanged += new System.EventHandler(this.rtTextArea_TextChanged);
 			// 
 			// menuStrip1
@@ -182,6 +183,7 @@
 			// 
 			// CutToolStripMenuItem
 			// 
+			this.CutToolStripMenuItem.Enabled = false;
 			this.CutToolStripMenuItem.Name = "CutToolStripMenuItem";
 			this.CutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
 			this.CutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
@@ -190,6 +192,7 @@
 			// 
 			// CopyToolStripMenuItem
 			// 
+			this.CopyToolStripMenuItem.Enabled = false;
 			this.CopyToolStripMenuItem.Name = "CopyToolStripMenuItem";
 			this.CopyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
 			this.CopyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
@@ -198,6 +201,7 @@
 			// 
 			// PasteToolStripMenuItem
 			// 
+			this.PasteToolStripMenuItem.Enabled = false;
 			this.PasteToolStripMenuItem.Name = "PasteToolStripMenuItem";
 			this.PasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
 			this.PasteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
@@ -258,6 +262,7 @@
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "Form1";
 			this.Text = "テキストエディタ";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();

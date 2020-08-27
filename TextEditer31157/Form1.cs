@@ -12,22 +12,50 @@ using System.Windows.Forms;
 namespace TextEditer31157 {
 	public partial class Form1 : Form {
 		private string fileName = "";
+		private bool Changed = false;
 		
 		public Form1() {
 			InitializeComponent();
 		}
 
 		private void Form1_Load(object sender, EventArgs e) {
+			//ロード
 			initTextEditer();
+			
 		}
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e) {
 			//終了
-			Application.Exit();
+			ExitApplication(sender,e);
+		}
+
+		private void ExitApplication(object sender, EventArgs e) {
+			//終了判定メソッド
+			if (rtTextArea.Text != "") {
+				if (Changed) {
+					DialogResult dr = MessageBox.Show
+						(Text + "は更新されています。保存しますか?",
+						Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+					Changed = false;
+					if (dr == DialogResult.Yes) {
+						SaveToolStripMenuItem_Click(sender, e);
+					}
+					else {
+						Application.Exit();
+					}
+				}
+				else {
+					Application.Exit();
+				}
+			}
+			else{
+				Application.Exit();
+			}
 		}
 
 		private void NamedSaveToolStripMenuItem_Click(object sender, EventArgs e) {
 			//名前を付けて保存
+			sfdFileSave.Filter = "テキスト文書 (.txt)|*.txt|すべてのファイル (*.*)|*.*";
 			if (sfdFileSave.ShowDialog() == DialogResult.OK) {
 				FileSave(sfdFileSave.FileName);
 			}
@@ -49,6 +77,7 @@ namespace TextEditer31157 {
 									(fileName, false, Encoding.GetEncoding("utf-8"))) {
 				sw.WriteLine(rtTextArea.Text);
 				Text = fileName + " - テキストエディタ";
+				initChanged();
 			}
 		}
 
@@ -60,72 +89,93 @@ namespace TextEditer31157 {
 					rtTextArea.Text = sr.ReadToEnd();
 					fileName = ofdFileOpen.FileName;
 					Text = fileName + " - テキストエディタ";
+					initChanged();
 				}
 			}
 		}
 
 		private void NewToolStripMenuItem_Click(object sender, EventArgs e) {
 			//新規作成
-			initTextEditer();
+			if (rtTextArea.Text != "") {
+				if (Changed) {
+					DialogResult dr = MessageBox.Show
+						(Text + "は更新されています。保存しますか?",
+						Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+					if (dr == DialogResult.Yes) {
+						SaveToolStripMenuItem_Click(sender, e);
+					}
+					else {
+						initTextEditer();
+					}
+				}
+				else {
+					initTextEditer();
+				}
+			}
+			else {
+				initTextEditer();
+			}
 		}
 
+		private void SaveJudge() {
+			Changed = true;
+		}
 		private void initTextEditer() {
 			//初期化メソッド
 			rtTextArea.Clear();
+			PasteJudge();
+			DeleteJudge();
 			fileName = "";
 			Text = "無題 - テキストエディタ";
+			initChanged();
+		}
+
+		private void initChanged() {
+			Changed = false;
 		}
 
 		private void UndoToolStripMenuItem_Click(object sender, EventArgs e) {
 			//元に戻す
-			if (rtTextArea.CanUndo == true) {
-				rtTextArea.Undo();
-				RedoToolStripMenuItem.Enabled = true;
-			}
-			else {
-				UndoToolStripMenuItem.Enabled = false;
-			}
+			rtTextArea.Undo();
 		}
 		private void RedoToolStripMenuItem_Click(object sender, EventArgs e) {
 			//やり直し
-			if (rtTextArea.CanRedo == true) {			
-				rtTextArea.Redo();
-				UndoToolStripMenuItem.Enabled = true;
-			}
-			else {
-				RedoToolStripMenuItem.Enabled = false;
-			}
+			rtTextArea.Redo();
 		}
 
 		private void rtTextArea_TextChanged(object sender, EventArgs e) {
-			//やり直し・元に戻すの判定
-			if (rtTextArea.CanRedo == true) {
-				RedoToolStripMenuItem.Enabled = true;
-			}
-			else {
-				RedoToolStripMenuItem.Enabled = false;
-			}
-			if (rtTextArea.CanUndo == true) {
-				UndoToolStripMenuItem.Enabled = true;
-			}
-			else {
-				UndoToolStripMenuItem.Enabled = false;
-			}
+			//やり直し・元に戻す・削除・保存の判定
+			RedoToolStripMenuItem.Enabled = rtTextArea.CanRedo ;
+			UndoToolStripMenuItem.Enabled = rtTextArea.CanUndo ;
+			DeleteJudge();
+			SaveJudge();
 		}
 
 		private void CutToolStripMenuItem_Click(object sender, EventArgs e) {
 			//切り取り
 			rtTextArea.Cut();
+			PasteJudge();
 		}
 
 		private void CopyToolStripMenuItem_Click(object sender, EventArgs e) {
 			//コピー
 			rtTextArea.Copy();
+			PasteJudge();
 		}
 
 		private void PasteToolStripMenuItem_Click(object sender, EventArgs e) {
 			//貼り付け
 			rtTextArea.Paste();
+		}
+
+		private void PasteJudge() {
+			//貼り付け判定
+			PasteToolStripMenuItem.Enabled = Clipboard.GetDataObject().GetDataPresent(DataFormats.Rtf);
+		}
+
+		private void DeleteJudge() {
+			//削除判定
+			DeleteToolStripMenuItem.Enabled = rtTextArea.Text.Length > 0;
 		}
 
 		private void DeleteToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -164,6 +214,14 @@ namespace TextEditer31157 {
 			}
 		}
 
+		private void rtTextArea_SelectionChanged(object sender, EventArgs e) {
+			//切り取り・コピー判定
+			CutToolStripMenuItem.Enabled = rtTextArea.SelectedText.Length > 0 ;
+			CopyToolStripMenuItem.Enabled = rtTextArea.SelectedText.Length > 0 ;
+		}
 
+		private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
+			ExitApplication(sender, e);
+		}
 	}
 }
